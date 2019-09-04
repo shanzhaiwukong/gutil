@@ -5,12 +5,19 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/base64"
+	"errors"
 )
 
 // AesEncrypt 加密
 // data：待加密的数据 key：密钥
 // return string (is a base64 stdencoding)
-func AesEncrypt(data, key []byte) (string, error) {
+func AesEncrypt(data, key []byte) (res string, err error) {
+	defer func() {
+		if ok := recover(); ok != nil {
+			res = ""
+			err = errors.New("异常")
+		}
+	}()
 	if block, err := aes.NewCipher(key); err != nil {
 		return "", err
 	} else {
@@ -27,7 +34,13 @@ func AesEncrypt(data, key []byte) (string, error) {
 // AesDecrypt 解密
 // data：带解密的字符串（加密后的字符串） key：密钥
 // return []byte (is orgin data)
-func AesDecrypt(data string, key []byte) ([]byte, error) {
+func AesDecrypt(data string, key []byte) (res []byte, err error) {
+	defer func() {
+		if ok := recover(); ok != nil {
+			res = nil
+			err = errors.New("异常")
+		}
+	}()
 	if block, err := aes.NewCipher(key); err != nil {
 		return nil, err
 	} else {

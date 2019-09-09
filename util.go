@@ -5,7 +5,9 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
+	"io/ioutil"
 )
 
 // AesEncrypt 加密
@@ -18,6 +20,11 @@ func AesEncrypt(data, key []byte) (res string, err error) {
 			err = errors.New("异常")
 		}
 	}()
+	var pkcs5Padding = func(ciphertext []byte, blockSize int) []byte {
+		padding := blockSize - len(ciphertext)%blockSize
+		padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+		return append(ciphertext, padtext...)
+	}
 	if block, err := aes.NewCipher(key); err != nil {
 		return "", err
 	} else {
@@ -41,6 +48,11 @@ func AesDecrypt(data string, key []byte) (res []byte, err error) {
 			err = errors.New("异常")
 		}
 	}()
+	var pkcs5UnPadding = func(origData []byte) []byte {
+		length := len(origData)
+		unpadding := int(origData[length-1])
+		return origData[:(length - unpadding)]
+	}
 	if block, err := aes.NewCipher(key); err != nil {
 		return nil, err
 	} else {
@@ -57,14 +69,16 @@ func AesDecrypt(data string, key []byte) (res []byte, err error) {
 	}
 }
 
-func pkcs5Padding(ciphertext []byte, blockSize int) []byte {
-	padding := blockSize - len(ciphertext)%blockSize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(ciphertext, padtext...)
-}
-
-func pkcs5UnPadding(origData []byte) []byte {
-	length := len(origData)
-	unpadding := int(origData[length-1])
-	return origData[:(length - unpadding)]
+// LoadJSON2Struct 从json文件转转换对象
+// filePath 文件路径
+// v (need a pointer interface)
+func LoadJSON2Struct(filePath string, v interface{}) error {
+	if bs, err := ioutil.ReadFile(filePath); err != nil {
+		return err
+	} else {
+		if err = json.Unmarshal(bs, v); err != nil {
+			return err
+		}
+		return nil
+	}
 }

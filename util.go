@@ -4,10 +4,18 @@ import (
 	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/md5"
+	"crypto/rand"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"io/ioutil"
+	"regexp"
+	"sync"
+	"time"
 )
 
 // AesEncrypt 加密
@@ -81,4 +89,53 @@ func LoadJSON2Struct(filePath string, v interface{}) error {
 		}
 		return nil
 	}
+}
+
+// MD5 加密
+func MD5(tag string) string {
+	h := md5.New()
+	h.Write([]byte(tag))
+	return hex.EncodeToString(h.Sum(nil))
+}
+
+var lock sync.Mutex
+
+// NewID 随机生成32位ID
+func NewID() string {
+	lock.Lock()
+	defer lock.Unlock()
+	b := make([]byte, 48)
+	str := fmt.Sprintf("%d", time.Now().UnixNano())
+	if _, err := io.ReadFull(rand.Reader, b); err == nil {
+		str += base64.URLEncoding.EncodeToString(b)
+	}
+	hash := md5.New()
+	hash.Write([]byte(str))
+	return hex.EncodeToString(hash.Sum(nil))
+}
+
+// RegGetMapByName 正则表达是提取命名组结果
+func RegGetMapByName(regRule, tagStr string) map[string]string {
+	result := make(map[string]string)
+	reg, err := regexp.Compile(regRule)
+	if err == nil {
+		matchs := reg.FindStringSubmatch(tagStr)
+		if matchs != nil {
+			for i, name := range reg.SubexpNames() {
+				if !(name == "") {
+					result[name] = matchs[i]
+				}
+			}
+		}
+	}
+	return result
+}
+
+// If 三元运算符
+//eg a,b:=0,1 If(a>b,a,b)
+func If(condition bool, yesVal, noVal interface{}) interface{} {
+	if condition {
+		return yesVal
+	}
+	return noVal
 }

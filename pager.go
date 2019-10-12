@@ -64,6 +64,18 @@ func NewPager(size, index, total, items int64, list interface{}) *Pager {
 	}
 }
 
+// ComputePage 计算页数
+func (that *Pager) ComputePage(items int64) {
+	if that.Size == 0 {
+		that.Size = 20
+	}
+	that.Items = items
+	that.Total = items / that.Size
+	if items%that.Size > 0 {
+		that.Total++
+	}
+}
+
 // ToSQL 转换为查询语句
 // return where (xx=xx and yy=yy),sort (order by xx,yy),limit (limit 0,10),params
 func (that *Pager) ToSQL() (string, string, string, []interface{}) {

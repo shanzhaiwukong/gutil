@@ -112,7 +112,7 @@ func (that *Pager) ToSQL() (string, string, string, []interface{}) {
 	}
 	for k, v := range that.Condition.Lks {
 		where = append(where, k+" like ?")
-		param = append(param, "%"+v+"%")
+		param = append(param, "%"+v.(string)+"%")
 	}
 	sort = strings.Join(that.Condition.Sorts, ",")
 	if sort != "" {

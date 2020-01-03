@@ -77,7 +77,7 @@ func (that *Pager) ComputePage(items int64) {
 }
 
 // ToSQL 转换为查询语句
-// return where (xx=xx and yy=yy),sort (order by xx,yy),limit (limit 0,10),params
+// return (where 1=1 and xx=xx and yy=yy),sort (order by xx,yy),limit (limit 0,10),params
 func (that *Pager) ToSQL() (string, string, string, []interface{}) {
 	var where = make([]string, 0)
 	where = append(where, " where 1=1")

@@ -80,6 +80,7 @@ func (that *Pager) ComputePage(items int64) {
 // return where (xx=xx and yy=yy),sort (order by xx,yy),limit (limit 0,10),params
 func (that *Pager) ToSQL() (string, string, string, []interface{}) {
 	var where = make([]string, 0)
+	where = append(where, " where 1=1")
 	var sort string
 	var limit string
 	var param = make([]interface{}, 0)

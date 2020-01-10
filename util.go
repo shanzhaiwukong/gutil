@@ -139,3 +139,12 @@ func If(condition bool, yesVal, noVal interface{}) interface{} {
 	}
 	return noVal
 }
+
+// GetFileContent 获取文件内容
+func GetFileContent(filePath string) string{
+	if data,err:=ioutil.ReadFile(filePath);err!=nil{
+		return ""
+	}else{
+		return string(data)
+	}
+}

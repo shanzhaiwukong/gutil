@@ -13,6 +13,8 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"regexp"
 	"sync"
 	"time"
@@ -141,10 +143,54 @@ func If(condition bool, yesVal, noVal interface{}) interface{} {
 }
 
 // GetFileContent 获取文件内容
-func GetFileContent(filePath string) string{
-	if data,err:=ioutil.ReadFile(filePath);err!=nil{
+func GetFileContent(filePath string) string {
+	if data, err := ioutil.ReadFile(filePath); err != nil {
 		return ""
-	}else{
+	} else {
 		return string(data)
 	}
+}
+
+// 检查文件是否存在
+func checkFileIsExist(filename string) bool {
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return false
+	}
+	return true
+}
+
+//创建文件夹
+func makeDirAll(filePath string) error {
+	return os.MkdirAll(filepath.Dir(filePath), 0660)
+}
+
+// WriteFileByOverwrite 以覆盖的方式写入文件 如果不存在 则创建
+func WriteFileByOverwrite(filePath string, content []byte) error {
+	if err := makeDirAll(filePath); err != nil {
+		return err
+	}
+	return ioutil.WriteFile(filePath, content, 0660)
+}
+
+// WriteFileByAppend 以追加的方式写入文件 如果不存在 则创建
+func WriteFileByAppend(filePath, content string) error {
+	if err := makeDirAll(filePath); err != nil {
+		return err
+	}
+	var f *os.File
+	var err error
+	if checkFileIsExist(filePath) {
+		f, err = os.OpenFile(filePath, os.O_APPEND, 0660)
+		if err != nil {
+			return err
+		}
+	} else {
+		f, err = os.Create(filePath)
+		if err != nil {
+			return err
+		}
+	}
+	defer f.Close()
+	_, err = io.WriteString(f, content)
+	return err
 }

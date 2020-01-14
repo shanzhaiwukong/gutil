@@ -40,3 +40,16 @@ func TestConvert(t *testing.T) {
 	}
 	fmt.Println("over")
 }
+
+func TestWriteFile(t *testing.T) {
+	ts := time.Now().Format("06-01-02 15:04:05.000000")
+	if err := gutil.WriteFileByOverwrite("./abc/123.txt", []byte(ts+"abc123")); err != nil {
+		t.Errorf("WriteFileByOverwrite [./abc/123.txt] error %v \r\n", err)
+	}
+	if err := gutil.WriteFileByOverwrite("./456.txt", []byte(ts+"456456")); err != nil {
+		t.Errorf("WriteFileByOverwrite [./456.txt] error %v \r\n", err)
+	}
+	if err := gutil.WriteFileByAppend("./abc/123.txt", "Hello world "+ts); err != nil {
+		t.Errorf("WriteFileByAppend [./abc/123.txt] error %v \r\n", err)
+	}
+}
